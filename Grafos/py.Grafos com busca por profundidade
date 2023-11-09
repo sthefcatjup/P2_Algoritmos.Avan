@@ -1,53 +1,154 @@
-class Grafo:
-    def __init__(self, vertices):
-        self.vertices = vertices
-        self.grafo = [[0]*self.vertices for i in range(self.vertices)]
+#include <iostream>
+#include "grafo.h"
 
-    def adiciona_aresta(self, u, v):
-        # estou pensando em grafos não direcionados
-        self.grafo[u-1][v-1] += 1
-        if u != v:
-            self.grafo[v-1][u-1] += 1
+using namespace std;
 
-    def mostra_matriz(self):
-        print('A matriz de adjacências é:')
-        for i in range(self.vertices):
-            print(self.grafo[i])
+class Grafo {
+public:
+    Grafo(int max, int valorarestanula);
+    ~Grafo();
 
-    def tem_aresta(self, u, v):
-        if self.grafo[u-1][v-1] == 0:
-            print(f'Não tem aresta entre os vértices {u} e {v}')
-        else:
-            print(f'Existe {self.grafo[u-1][v-1]} de arestas entre os vértices {u} e {v}')
+    void inserevertice(TipoItem item);
+    void inserearesta(TipoItem Nosaida, TipoItem Noentrada, int peso);
+    void buscaemprofundidade(TipoItem origem, TipoItem destino);
+    void imprimirvertices();
 
-    def eh_euleriano(self):
-        contador = 0
-        for i in range(self.vertices):
-            grau = 0
-            for j in range(self.vertices):
-                if i == j:
-                    grau = grau + 2 * self.grafo[i][j]
-                else:
-                    grau += self.grafo[i][j]
-            if grau % 2 != 0:
-                contador += 1
-        if contador == 0:
-            print('É um grafo euleriano!')
-        elif contador == 2:
-            print('É um grafo semieuleriano!')
-        else:
-            print('O grafo não é euleriano e nem semieulariano!')
+private:
+    int maxvertices;
+    int numvertices;
+    int arestanula;
 
+    TipoItem* vertices;
+    int** matrizadjacencias;
+    bool* marcador;
 
-g = Grafo(4)
+    int obterindice(TipoItem item);
+    void limpamarcador();
+    int obtergrau(TipoItem item);
+};
 
-g.adiciona_aresta(1, 2)
-g.adiciona_aresta(3, 4)
-#g.adiciona_aresta(2, 3)
-#g.adiciona_aresta(1,4)
+Grafo::Grafo(int max, int valorarestanula)
+    : numvertices(0), maxvertices(max), arestanula(valorarestanula)
+{
+    marcador = new bool[maxvertices];
+    vertices = new TipoItem[maxvertices];
+    matrizadjacencias = new int*[maxvertices];
+    for (int i = 0; i < maxvertices; i++) {
+        matrizadjacencias[i] = new int[maxvertices];
+    }
 
-#g.tem_aresta(2,4)
+    for (int i = 0; i < maxvertices; i++) {
+        for (int j = 0; j < maxvertices; j++) {
+            matrizadjacencias[i][j] = arestanula;
+        }
+    }
+}
 
-g.eh_euleriano()
+Grafo::~Grafo()
+{
+    delete[] vertices;
+    for (int i = 0; i < maxvertices; i++) {
+        delete[] matrizadjacencias[i];
+    }
+    delete[] matrizadjacencias;
+    delete[] marcador;
+}
 
-g.mostra_matriz()
+int Grafo::obterindice(TipoItem item)
+{
+    int indice = 0;
+    while (item != vertices[indice]) {
+        indice++;
+    }
+    return indice;
+}
+
+void Grafo::inserevertice(TipoItem item)
+{
+    if (numvertices < maxvertices) {
+        vertices[numvertices] = item;
+        numvertices++;
+    } else {
+        cout << "O numero maximo de vertices foi alcancado!\n";
+    }
+}
+
+void Grafo::inserearesta(TipoItem Nosaida, TipoItem Noentrada, int peso)
+{
+    int linha = obterindice(Nosaida);
+    int coluna = obterindice(Noentrada);
+
+    matrizadjacencias[linha][coluna] = peso;
+    // Uncomment the following line for undirected graphs:
+    // matrizadjacencias[coluna][linha] = peso;
+}
+
+void Grafo::limpamarcador()
+{
+    for (int i = 0; i < maxvertices; i++) {
+        marcador[i] = false;
+    }
+}
+
+void Grafo::buscaemprofundidade(TipoItem origem, TipoItem destino)
+{
+    limpamarcador();
+    int origemIndice = obterindice(origem);
+    int destinoIndice = obterindice(destino);
+    bool encontrado = false;
+
+    std::function<void(int)> dfs = [&](int vertice) {
+        marcador[vertice] = true;
+        if (vertice == destinoIndice) {
+            encontrado = true;
+            return;
+        }
+        for (int i = 0; i < numvertices; i++) {
+            if (matrizadjacencias[vertice][i] != arestanula && !marcador[i]) {
+                cout << "Visitando: " << vertices[i] << endl;
+                dfs(i);
+            }
+        }
+    };
+
+    cout << "Iniciando Busca em Profundidade a partir de: " << origem << endl;
+    dfs(origemIndice);
+    cout << "Caminho " << (encontrado ? "" : "Nao ") << "Encontrado" << endl;
+}
+
+void Grafo::imprimirvertices()
+{
+    cout << "Lista de Vertices:\n";
+    for (int i = 0; i < numvertices; i++) {
+        cout << i << ": " << vertices[i] << endl;
+    }
+}
+
+int main() {
+    Grafo grafo(10, -1);
+
+    grafo.inserevertice('A');
+    grafo.inserevertice('B');
+    grafo.inserevertice('C');
+    grafo.inserevertice('D');
+    grafo.inserevertice('E');
+    grafo.inserevertice('F');
+    grafo.inserevertice('G');
+    grafo.inserevertice('H');
+    grafo.inserevertice('I');
+    grafo.inserevertice('J');
+
+    grafo.inserearesta('A', 'B', 1);
+    grafo.inserearesta('A', 'C', 1);
+    grafo.inserearesta('B', 'D', 1);
+    grafo.inserearesta('B', 'E', 1);
+    grafo.inserearesta('C', 'F', 1);
+    grafo.inserearesta('D', 'G', 1);
+    grafo.inserearesta('E', 'H', 1);
+    grafo.inserearesta('F', 'I', 1);
+    grafo.inserearesta('G', 'J', 1);
+
+    grafo.buscaemprofundidade('A', 'H');
+
+    return 0;
+}
