@@ -1,0 +1,53 @@
+class CaminhoHamiltoniano:
+    def __init__(self, vertices):
+        self.grafo = [[0] * vertices for _ in range(vertices)]
+        self.vertices = vertices
+
+    def tem_caminho_hamiltoniano(self):
+        def e_valido(v, pos, caminho):
+            if self.grafo[caminho[pos - 1]][v] == 0:
+                return False
+
+            if v in caminho:
+                return False
+
+            return True
+
+        def util_caminho_hamiltoniano(caminho, pos):
+            if pos == self.vertices:
+                return True
+
+            for v in range(self.vertices):
+                if e_valido(v, pos, caminho):
+                    caminho[pos] = v
+
+                    if util_caminho_hamiltoniano(caminho, pos + 1):
+                        return True
+
+                    caminho[pos] = -1
+
+            return False
+
+        caminho = [-1] * self.vertices
+        caminho[0] = 0
+
+        if not util_caminho_hamiltoniano(caminho, 1):
+            return False
+
+        return True
+
+# Exemplo de uso:
+g = CaminhoHamiltoniano(5)
+g.grafo = [
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 1],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0],
+]
+
+if g.tem_caminho_hamiltoniano():
+    print("Caminho Hamiltoniano existe")
+else:
+    print("Caminho Hamiltoniano não existe")
+    
