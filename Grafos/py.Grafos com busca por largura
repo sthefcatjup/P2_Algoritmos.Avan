@@ -1,0 +1,62 @@
+from collections import deque
+
+# Definição da Estrutura do Grafo
+class Graph:
+    def __init__(self):
+        self.vertices = {}
+
+    def add_edge(self, origin, destination):
+        self.vertices.setdefault(origin, []).append(destination)
+
+    def get_vertices(self):
+        return list(self.vertices.keys())
+
+    def get_edges(self, vertex):
+        return self.vertices.get(vertex, [])
+
+# Algoritmo de Busca em Largura (BFS)
+def bfs(graph, start_vertex):
+    queue = deque()
+    distances = {vertex: -1 for vertex in graph.get_vertices()}
+    parents = {vertex: None for vertex in graph.get_vertices()}
+
+    # Inicialização
+    distances[start_vertex] = 0
+    parents[start_vertex] = start_vertex
+    queue.append(start_vertex)
+
+    # Execução do BFS
+    while queue:
+        current_vertex = queue.popleft()
+        for neighbor in graph.get_edges(current_vertex):
+            if distances[neighbor] == -1:
+                distances[neighbor] = distances[current_vertex] + 1
+                parents[neighbor] = current_vertex
+                queue.append(neighbor)
+
+    return parents, distances
+
+# Leitura e Processamento da Entrada
+graph = Graph()
+
+# Leitura do vértice inicial
+start_vertex = int(input("Digite o vértice inicial: "))
+
+# Leitura das arestas e inserção no grafo
+while True:
+    try:
+        input_edge = input("Digite as arestas (origem destino): ")
+        if not input_edge:
+            break
+        origin, destination = map(int, input_edge.split())
+        graph.add_edge(origin, destination)
+        graph.add_edge(destination, origin)
+    except ValueError:
+        print("Entrada inválida. Digite dois números separados por espaço.")
+
+# Saída
+print("Lista de Vértices:", graph.get_vertices())
+parents, distances = bfs(graph, start_vertex)
+print("Resultados BFS:")
+for vertex in graph.get_vertices():
+    print(f"{parents[vertex]} -> {vertex} ---- {distances[vertex]}")
