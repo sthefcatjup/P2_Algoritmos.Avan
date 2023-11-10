@@ -1,0 +1,31 @@
+def mochila_fracionaria(items, capacidad_mochila):
+    # Ordena os itens pelo valor por peso em ordem decrescente
+    items_ordenados = sorted(items, key=lambda x: x[1] / x[0], reverse=True)
+
+    mochila_actual = []
+    valor_total = 0
+
+    for item in items_ordenados:
+        peso, valor = item
+        if capacidad_mochila >= peso:
+            # Adiciona o item inteiro à mochila
+            mochila_actual.append(item)
+            capacidad_mochila -= peso
+            valor_total += valor
+        else:
+            # Adiciona uma fração do item à mochila
+            fracao = capacidad_mochila / peso
+            mochila_actual.append((peso * fracao, valor * fracao))
+            valor_total += valor * fracao
+            break  # Mochila está cheia
+
+    return mochila_actual, valor_total
+
+# Exemplo de uso
+items = [(2, 49), (5, 24), (10, 50), (5, 10), (8, 70)]
+capacidad_mochila = 20
+
+mochila, valor = mochila_fracionaria(items, capacidad_mochila)
+
+print("Itens na mochila:", mochila)
+print("Valor total na mochila:", valor)
