@@ -1,0 +1,50 @@
+from collections import defaultdict, deque
+
+def ordenacao_topologica(grafo):
+    #Função para calcular contagens de entrada para cada vértice
+    def calcular_contagens_entrada(grafo):
+        contagens_entrada = defaultdict(int)
+        for vertices in grafo.values():
+            for v in vertices:
+                contagens_entrada[v] += 1
+        return contagens_entrada
+
+    # Inicializa as contagens de entrada e a fila de vértices sem dependências
+    contagens_entrada = calcular_contagens_entrada(grafo)
+    fila = deque([v for v in grafo if contagens_entrada[v] == 0])
+
+    # Lista para armazenar a ordenação topológica resultante
+    ordenacao_topologica = []
+
+    while fila:
+        # Remove o vértice da fila
+        vertice = fila.popleft()
+        ordenacao_topologica.append(vertice)
+
+
+        #Atualiza as contagens de entrada dos vértices adjacentes
+        for adjacente in grafo[vertice]:
+            contagens_entrada[adjacente] -= 1
+            if contagens_entrada[adjacente] == 0:
+                fila.append(adjacente)
+
+    #Verificar se todos os vértices foram visitados (evita ciclos)
+    if len(ordenacao_topologica) == len(grafo):
+        return ordenacao_topologica
+    else:
+        return None  #O grafo contém um ciclo
+
+#Exemplo de uso
+grafo_exemplo = {
+    '1': ['2', '3'],
+    '2': ['4'],
+    '3': ['4'],
+    '4': []
+}
+
+resultado = ordenacao_topologica(grafo_exemplo)
+
+if resultado:
+    print("Ordenação Topológica:", resultado)
+else:
+    print("O grafo contém um ciclo e não pode ser ordenado topologicamente.")
